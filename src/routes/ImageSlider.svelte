@@ -1,13 +1,10 @@
 <script lang="ts">
   import { browser } from "$app/environment";
-
   import { onDestroy, onMount } from "svelte";
 
   let screenWidth = $state(
     (() => {
-      if (browser) {
-        return window.innerWidth;
-      }
+      if (browser) return window.innerWidth;
       return 0;
     })(),
   );
@@ -16,150 +13,132 @@
 
   let currentItem = $state(0);
   let interacting = $state(false);
-
+  let animated = $state(true);
   let mouseTranslation = $state(0);
-
-  $effect(() => {
-    if (interacting) {
-      clearInterval(currentTimeout);
-    } else {
-      startSliderLoop();
-    }
-  });
-
-  function incrementItem() {
-    startSliderLoop();
-
-    if (currentItem == items.length - 1) {
-      currentItem = 0;
-      return;
-    }
-    currentItem++;
-  }
-  function decrementItem() {
-    startSliderLoop();
-
-    if (currentItem == 0) {
-      currentItem = items.length - 1;
-      return;
-    }
-    currentItem--;
-  }
-
   let currentTimeout: number | undefined;
 
-  function startSliderLoop() {
+  function incrementItem() {
+    currentItem++;
+    scheduleLoop();
+  }
+
+  function decrementItem() {
+    currentItem--;
+    scheduleLoop();
+  }
+
+  function handleTransitionEnd() {
+    if (currentItem < 0) {
+      animated = false;
+      currentItem = items.length - 1;
+    } else if (currentItem >= items.length) {
+      animated = false;
+      currentItem = 0;
+    }
+    setTimeout(() => (animated = true), 0);
+  }
+
+  function scheduleLoop() {
     clearTimeout(currentTimeout);
-
     currentTimeout = setTimeout(() => {
-      if (interacting) {
-        startSliderLoop();
-
-        return;
-      }
-
-      incrementItem();
+      if (!interacting) incrementItem();
     }, 4000);
   }
 
-  function handleResize(e: UIEvent) {
+  function handleResize() {
     screenWidth = window.innerWidth;
-    console.log(screenWidth);
   }
 
   function handleMousePressDown() {
     interacting = true;
+    clearTimeout(currentTimeout);
   }
 
   function handleMouseRelease(e: MouseEvent) {
     interacting = false;
 
-    const swipeThreshold = 200;
-
-    console.log(e.movementX - mouseTranslation);
-
-    if (
-      // mouseTranslation > swipeThreshold ||
-      e.movementX - mouseTranslation <
-      -35
-    ) {
+    if (e.movementX - mouseTranslation < -35) {
       decrementItem();
-    } else if (
-      // mouseTranslation < -swipeThreshold ||
-      e.movementX - mouseTranslation >
-      35
-    ) {
+    } else if (e.movementX - mouseTranslation > 35) {
       incrementItem();
+    } else {
+      scheduleLoop();
     }
 
     mouseTranslation = 0;
   }
 
   function handleMouseMove(e: MouseEvent) {
-    if (interacting) {
-      mouseTranslation += e.movementX;
-    }
+    if (interacting) mouseTranslation += e.movementX;
   }
 
   onMount(() => {
     window.addEventListener("resize", handleResize);
     window.addEventListener("mousemove", handleMouseMove);
-
-    startSliderLoop();
+    scheduleLoop();
   });
 
   onDestroy(() => {
     if (!browser) return;
-
     window.removeEventListener("resize", handleResize);
     window.removeEventListener("mousemove", handleMouseMove);
+    clearTimeout(currentTimeout);
   });
 </script>
 
 <section>
-  <div class="h-100 flex relative">
+  <div class="relative h-100 overflow-hidden">
+    <!-- Left clone -->
+    <div
+      class="absolute inset-0 flex cursor-grab active:cursor-grabbing"
+      class:transition-transform={animated && !interacting}
+      class:duration-500={animated && !interacting}
+      style="transform: translateX(calc(-{items.length}00% + {-(
+        currentItem * screenWidth
+      ) + mouseTranslation}px))"
+    >
+      {#each items as _, index}
+        <div class="bg-red-300 shrink-0 w-screen h-full">{index}</div>
+      {/each}
+    </div>
+
+    <!-- Main strip -->
     <div
       onmousedown={handleMousePressDown}
       onmouseup={handleMouseRelease}
-      class="w-screen flex overflow-hidden cursor-grab active:cursor-grabbing"
+      ontransitionend={handleTransitionEnd}
+      class="absolute inset-0 flex cursor-grab active:cursor-grabbing"
+      class:transition-transform={animated && !interacting}
+      class:duration-500={animated && !interacting}
+      style="transform: translateX({-(currentItem * screenWidth) +
+        mouseTranslation}px)"
     >
-      <div
-        class="bg-red-300 shrink-0 w-screen h-full"
-        class:transition={!interacting}
-        class:duration-500={!interacting}
-        style="transform: translateX(-100%) translateX({-currentItem *
-          screenWidth +
-          mouseTranslation}px)"
-      >
-        last
-      </div>
       {#each items as _, index}
-        <div
-          class="bg-red-300 shrink-0 w-screen h-full"
-          class:transition={!interacting}
-          class:duration-500={!interacting}
-          style="transform: translateX(-100%) translateX({-(
-            currentItem * screenWidth
-          ) + mouseTranslation}px)"
-        >
-          {index}
-        </div>
+        <div class="bg-red-300 shrink-0 w-screen h-full">{index}</div>
       {/each}
-      <div
-        class="bg-red-300 shrink-0 w-screen h-full"
-        class:transition={!interacting}
-        class:duration-500={!interacting}
-        style="transform: translateX({items.length -
-          1}00%) translateX({-currentItem * screenWidth + mouseTranslation}px)"
-      >
-        first
-      </div>
     </div>
 
+    <!-- Right clone -->
+    <div
+      class="absolute inset-0 flex cursor-grab active:cursor-grabbing"
+      class:transition-transform={animated && !interacting}
+      class:duration-500={animated && !interacting}
+      style="transform: translateX(calc({items.length}00% + {-(
+        currentItem * screenWidth
+      ) + mouseTranslation}px))"
+    >
+      {#each items as _, index}
+        <div class="bg-red-300 shrink-0 w-screen h-full">{index}</div>
+      {/each}
+    </div>
+
+    <!-- Left arrow -->
+    <!-- svelte-ignore a11y_consider_explicit_label -->
     <button
       onclick={decrementItem}
-      class="p-4 rounded-full hover:bg-neutral-400/25 active:bg-neutral-700/25 transition cursor-pointer absolute ml-4 self-center"
-      ><svg
+      class="absolute left-4 top-1/2 -translate-y-1/2 p-4 rounded-full hover:bg-neutral-400/25 active:bg-neutral-700/25 transition cursor-pointer z-10"
+    >
+      <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
         viewBox="0 0 24 24"
@@ -175,10 +154,13 @@
       </svg>
     </button>
 
+    <!-- Right arrow -->
+    <!-- svelte-ignore a11y_consider_explicit_label -->
     <button
       onclick={incrementItem}
-      class="p-4 rounded-full hover:bg-neutral-400/25 active:bg-neutral-700/25 transition cursor-pointer absolute mr-4 self-center right-0"
-      ><svg
+      class="absolute right-4 top-1/2 -translate-y-1/2 p-4 rounded-full hover:bg-neutral-400/25 active:bg-neutral-700/25 transition cursor-pointer z-10"
+    >
+      <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
         viewBox="0 0 24 24"
@@ -195,7 +177,25 @@
     </button>
   </div>
 
-  <div>
-    {currentItem} - {interacting}
+  <!-- Dot indicators -->
+  <div class="flex justify-center gap-2 mt-2">
+    {#each items as _, index}
+      <button
+        onclick={() => {
+          currentItem = index;
+          scheduleLoop();
+        }}
+        class="w-2 h-2 rounded-full transition-all duration-400"
+        class:bg-neutral-600={((currentItem % items.length) + items.length) %
+          items.length ===
+          index}
+        class:w-6={((currentItem % items.length) + items.length) %
+          items.length ===
+          index}
+        class:bg-neutral-300={((currentItem % items.length) + items.length) %
+          items.length !==
+          index}
+      />
+    {/each}
   </div>
 </section>
