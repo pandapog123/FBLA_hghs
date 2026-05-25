@@ -1,6 +1,20 @@
 @import "tailwindcss";
 
+@theme {
+  --color-primary: #2f58a6;
+  --color-secondary: #27377a;
+  --color-accent: #f9b320;
+  --color-neutral: #141414;
+  --color-off-neutral: #f4f4f4;
+
+  --breakpoint-hide-menu: 925px;
+}
+
 :root {
   font-family: "Lato", sans-serif;
   font-style: normal;
+}
+
+body {
+  @apply text-neutral;
 }

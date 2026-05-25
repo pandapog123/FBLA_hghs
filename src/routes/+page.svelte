@@ -3,7 +3,7 @@
 </script>
 
 <main>
-  <ImageSlider />
+  <!-- <ImageSlider /> -->
 </main>
 
 <style>
