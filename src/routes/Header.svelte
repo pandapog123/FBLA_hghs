@@ -1,19 +1,12 @@
 <script lang="ts">
   import { menuShown } from "$lib/menu/store";
-
-  const navMenuOptions = ["About", "Contact", "Events", "Support Us"] as const;
-  let currentNavMenu = $state<(typeof navMenuOptions)[number] | undefined>(
-    undefined,
-  );
+  import NavMenuItem from "./NavMenuItem.svelte";
 
   const defaultMenuItemClass =
     "font-medium text-lg" +
-    " hover:bg-neutral/10 active:bg-neutral/5 focus:bg-neutral/10 transition-[background]" +
-    " p-2 rounded" +
-    " outline-solid outline-neutral/30 outline-0 outline-offset-0 focus:outline-2 transition-[outline]";
-
-  const navTriggerClass =
-    defaultMenuItemClass + " leading-none flex gap-1 items-center pr-1";
+    " hover:bg-neutral/5 active:bg-neutral/10 focus:bg-neutral/5 transition-[background,outline]" +
+    " p-3 rounded-lg" +
+    " outline-solid outline-neutral/30 outline-0 outline-offset-0 focus:outline-2 flex leading-none";
 </script>
 
 <header class="px-12 py-6 flex justify-between items-center gap-16">
@@ -29,119 +22,103 @@
 
   <nav>
     <ul class="hidden hide-menu:flex gap-2 items-center">
-      {#each navMenuOptions as menuOption}
-        <li>
-          <button
-            class={navTriggerClass}
-            onmouseenter={() => {
-              currentNavMenu = menuOption;
-            }}
-            onmouseleave={() => {
-              currentNavMenu = undefined;
-            }}
-            onclick={() => {
-              if (currentNavMenu != menuOption) {
-                currentNavMenu = menuOption;
-              } else {
-                currentNavMenu = undefined;
-              }
-            }}
+      {#snippet AboutContent()}
+        <ul class="shrink-0 flex flex-col gap-1">
+          <a
+            href="/about"
+            class="px-2 py-2 hover:bg-neutral/5 active:bg-neutral-/10 font-medium w-full rounded-lg transition-colors"
           >
-            <span> {menuOption} </span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke-width="2"
-              stroke="currentColor"
-              class="size-4 transition-transform duration-200"
-              class:rotate-180={currentNavMenu === menuOption}
-            >
-              <path
+            About Us
+          </a>
+
+          <a
+            href="/competitions"
+            class="px-2 py-2 hover:bg-neutral/5 active:bg-neutral-/10 font-medium w-full rounded-lg transition-colors"
+          >
+            Competitions
+          </a>
+
+          <a
+            href="/education-blog"
+            class="px-2 py-2 hover:bg-neutral/5 active:bg-neutral-/10 font-medium w-full rounded-lg transition-colors"
+          >
+            Education Blog
+          </a>
+        </ul>
+      {/snippet}
+      <NavMenuItem content={AboutContent}>About</NavMenuItem>
+
+      {#snippet ContactContent()}
+        <ul class="shrink-0 flex flex-col gap-1">
+          <a
+            href="/contact"
+            class="px-2 py-2 hover:bg-neutral/5 active:bg-neutral-/10 font-medium w-full rounded-lg transition-colors"
+          >
+            Contact Us
+          </a>
+
+          <a
+            href="https://www.instagram.com/hghsfbla"
+            target="_blank"
+            class="px-2 py-2 pr-4 hover:bg-neutral/5 active:bg-neutral-/10 font-medium w-full rounded-lg transition-colors flex justify-between items-center gap-4"
+          >
+            <div class="flex gap-1">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
                 stroke-linecap="round"
                 stroke-linejoin="round"
-                d="m19.5 8.25-7.5 7.5-7.5-7.5"
-              />
-            </svg>
-          </button>
-        </li>
-      {/each}
-      <!-- <li>
-        <button class={navTriggerClass}>
-          <span> About </span>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke-width="2"
-            stroke="currentColor"
-            class="size-4 transition-transform duration-200"
+                class=""
+                ><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path
+                  d="M4 8a4 4 0 0 1 4 -4h8a4 4 0 0 1 4 4v8a4 4 0 0 1 -4 4h-8a4 4 0 0 1 -4 -4l0 -8"
+                /><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /><path
+                  d="M16.5 7.5v.01"
+                /></svg
+              >
+
+              <span> Instagram </span>
+            </div>
+          </a>
+        </ul>
+      {/snippet}
+      <NavMenuItem content={ContactContent}>Contact</NavMenuItem>
+
+      {#snippet EventsContent()}
+        <ul class="shrink-0 flex flex-col gap-1">
+          <a
+            href="/events-calendar"
+            class="px-2 py-2 hover:bg-neutral/5 active:bg-neutral-/10 font-medium w-full rounded-lg transition-colors"
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="m19.5 8.25-7.5 7.5-7.5-7.5"
-            />
-          </svg>
-        </button>
-      </li>
-      <li>
-        <button class={navTriggerClass}>
-          <span> Contact </span>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke-width="2"
-            stroke="currentColor"
-            class="size-4 transition-transform duration-200"
+            Events Calendar
+          </a>
+
+          <a
+            href="/events-blog"
+            class="px-2 py-2 hover:bg-neutral/5 active:bg-neutral-/10 font-medium w-full rounded-lg transition-colors"
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="m19.5 8.25-7.5 7.5-7.5-7.5"
-            />
-          </svg>
-        </button>
-      </li>
-      <li>
-        <button class={navTriggerClass}>
-          <span> Events </span>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke-width="2"
-            stroke="currentColor"
-            class="size-4 transition-transform duration-200"
+            Events Blog
+          </a>
+        </ul>
+      {/snippet}
+      <NavMenuItem content={EventsContent}>Events</NavMenuItem>
+
+      {#snippet SupportUsContent()}
+        <ul class="shrink-0 flex w-full flex-col gap-1">
+          <a
+            href="/donations"
+            class="px-2 py-2 hover:bg-neutral/5 active:bg-neutral-/10 font-medium w-full rounded-lg transition-colors"
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="m19.5 8.25-7.5 7.5-7.5-7.5"
-            />
-          </svg>
-        </button>
-      </li>
-      <li>
-        <button class={navTriggerClass}>
-          <span class=""> Support Us </span>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke-width="2"
-            stroke="currentColor"
-            class="size-4 transition-transform duration-200"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="m19.5 8.25-7.5 7.5-7.5-7.5"
-            />
-          </svg>
-        </button>
-      </li> -->
+            Donations
+          </a>
+        </ul>
+      {/snippet}
+      <NavMenuItem content={SupportUsContent}>Support Us</NavMenuItem>
+
       <li>
         <a href="/officers" class={defaultMenuItemClass}> Our Leadership </a>
       </li>
