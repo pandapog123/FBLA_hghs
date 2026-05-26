@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Snippet } from "svelte";
+  import { type Snippet } from "svelte";
   import { fade, fly } from "svelte/transition";
 
   const defaultMenuItemClass =
@@ -17,7 +17,21 @@
 
   let showContent = $state(false);
   let currentTimeout: number | undefined;
+
+  let selected = false;
+
+  function dismissNav() {
+    if (selected) {
+      selected = false;
+      return;
+    }
+
+    showContent = false;
+    clearTimeout(currentTimeout);
+  }
 </script>
+
+<svelte:body onclick={dismissNav} />
 
 <li
   class="group relative"
@@ -33,9 +47,10 @@
 >
   <button
     class="{navTriggerClass} {showContent && 'bg-neutral/5'}"
-    onclick={() => {
+    onclick={(e) => {
       clearTimeout(currentTimeout);
       showContent = !showContent;
+      selected = true;
     }}
   >
     <span> {@render children()} </span>
@@ -62,8 +77,8 @@
       in:fly={{ duration: 100, opacity: 0, y: -8 }}
       out:fade={{ duration: 100 }}
       onclick={() => {
-        clearTimeout(currentTimeout);
-        showContent = false;
+        // clearTimeout(currentTimeout);
+        // showContent = false;
       }}
     >
       <div
